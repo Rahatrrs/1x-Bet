@@ -1,0 +1,121 @@
+<script>
+  const gamesContainer = document.querySelector('.games');
+  const indicatorsContainer = document.querySelector('.indicator-container');
+  const indicators = indicatorsContainer.querySelectorAll('.indicator');
+  const gamesContainer2 = document.querySelector('.games');
+  const gameCards = gamesContainer2.querySelectorAll('.game-row');
+  const cardWidth = gameCards[0].offsetWidth;
+  let currentCardIndex = 0;
+  
+  let isDragging = false;
+  let startPosition = 0;
+  let currentTranslate = 0;
+  let prevTranslate = 0;
+  let animationID;
+  
+  const startDragging = (e) => {
+    e.preventDefault();
+    startPosition = e.clientX || e.touches[0].clientX;
+    isDragging = true;
+    animationID = requestAnimationFrame(animation);
+    gamesContainer.classList.add('grabbing');
+    gamesContainer.style.userSelect = 'none';
+  
+    // add event listeners for mousemove and mouseup events
+    document.addEventListener('mousemove', drag);
+    document.addEventListener('mouseup', stopDragging);
+    document.addEventListener('touchmove', drag);
+    document.addEventListener('touchend', stopDragging);
+  };
+  
+  const stopDragging = () => {
+    isDragging = false;
+    cancelAnimationFrame(animationID);
+    prevTranslate = currentTranslate;
+    gamesContainer.classList.remove('grabbing');
+    gamesContainer.style.userSelect = 'auto';
+  
+    // remove event listeners for mousemove and mouseup events
+    document.removeEventListener('mousemove', drag);
+    document.removeEventListener('mouseup', stopDragging);
+    document.removeEventListener('touchmove', drag);
+    document.removeEventListener('touchend', stopDragging);
+  };
+  
+  const drag = (e) => {
+    if (isDragging) {
+      e.preventDefault();
+      const currentPosition = e.clientX || e.touches[0].clientX;
+      currentTranslate = prevTranslate + currentPosition - startPosition;
+      
+
+      
+       const maxTranslate = 0 - cardWidth * (gameCards.length +0.30) + gamesContainer.offsetWidth;
+
+
+
+      if (currentTranslate > 0) {
+  currentTranslate = 0;
+} else if (currentTranslate < maxTranslate) {
+  currentTranslate = maxTranslate;
+}
+      setTranslate(currentTranslate);
+
+
+      indicators.forEach((indicator, currentTranslate) => {
+      if (currentTranslate === currentCardIndex) {
+        indicator.classList.add('active');
+      } else {
+        indicator.classList.remove('active');
+      }
+    })
+
+      
+    }
+  };
+  
+  const animation = () => {
+    setTranslate(currentTranslate);
+    if (isDragging) requestAnimationFrame(animation);
+  };
+  
+  const setTranslate = (translate) => {
+    gamesContainer.style.transform = `translateX(${translate}px)`;
+  };
+  
+  gamesContainer.addEventListener('mousedown', startDragging);
+  gamesContainer.addEventListener('touchstart', startDragging);
+  gamesContainer.parentElement.addEventListener('mouseleave', stopDragging);
+  gamesContainer.parentElement.addEventListener('mouseup', stopDragging);
+  
+  
+  
+  indicators.forEach((indicator, index) => {
+    indicator.addEventListener('click', () => {
+      goToCard(index);
+    });
+  });
+  
+  function goToCard(index) {
+    if (index < 0 || index >= gameCards.length) {
+      return;
+    }
+  
+    currentCardIndex = index;
+    const translateX = -cardWidth * currentCardIndex;
+    gamesContainer2.style.transform = `translateX(${translateX}px)`;
+  
+    updateIndicators();
+  }
+  
+  function updateIndicators() {
+    indicators.forEach((indicator, index) => {
+      if (index === currentCardIndex) {
+        indicator.classList.add('active');
+      } else {
+        indicator.classList.remove('active');
+      }
+    });
+  }
+  </script>
+  
